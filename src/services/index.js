@@ -20,7 +20,7 @@ app.all('*', function (req, res, next) {
   res.header('Content-Type', 'application/json;charset=utf-8');
   next();
 });
-const todos=[
+ todos=[
   {
     id:1,
     title:"吃饭",
@@ -35,13 +35,29 @@ const todos=[
     title:"听音乐",
     completed:false
   }];
-app.get('/getList',(req,res)=>{
+app.get('/getTodoList',(req,res)=>{
   res.json({
     todos,
     code:200,
     msg:'成功'
   })
 });
+app.get('/completedTodos',(req,res)=>{
+  res.json({
+    todos:todos.filter(item=>{return item.completed === false}),
+    code:200,
+    msg:'成功'
+  })
+});
+app.post('/addTodos',(req,res)=>{
+  todos.push(JSON.parse(req.body.data));
+  res.json({
+    todos,
+    code:200,
+    msg:'成功'
+  })
+});
+
 app.listen(3000,()=>{
   console.log('running....');
 });

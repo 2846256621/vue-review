@@ -14,7 +14,7 @@
       </li>
     </ul>
     <!-- 若全都没完成，则隐藏此按钮 -->
-    <button v-if="todos.some(item=>item.completed)"
+    <button v-if="hasCompleted"
             class="clear-completed"
             @click="handleClearCompleted">Clear completed</button>
   </footer>
@@ -26,18 +26,25 @@
         // props:['todos'],
         data(){
           return{
-            todos:'',
+            todos:[],
             all:true,
             active:false,
             completed:false,
 
           }
         },
+        computed:{
+          //展示全部清除按钮
+          hasCompleted(){
+            return this.todos.some(function (item,index) {
+              return item.completed;
+            });
+          }
+        },
         created(){
           this.$bus.on('getTodos',(item)=>{
-            console.log('子'+item);
             this.todos = item;
-          }); //接收
+          }); //接收todos
         },
         methods:{
           //全部数据
@@ -66,10 +73,18 @@
             });
             this.$bus.emit('completedTodos', completedTodos); //传入
           },
-          //清除全部
+          //清除全部已完成的
           handleClearCompleted(){
+            // this.$http.get('/completedTodos',{}, (res,err) => {
+            //   this.todos = res.data.todos;
+            //   this.$bus.emit('newTodos', this.todos); //传入
+            // })
+            this.todos = this.todos.filter((item) =>{
+              return !item.completed
+            });
+            this.$bus.emit('newTodos', this.todos); //传入
+          },
 
-          }
         }
     }
 </script>
@@ -127,6 +142,9 @@
     text-decoration: none;
     border: 1px solid transparent;
     border-radius: 3px;
+  }
+  .clear-completed:hover{
+    text-decoration: #b1b1b1;
   }
   .clear-completed, html .clear-completed:active {
     float: right;

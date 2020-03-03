@@ -1,7 +1,11 @@
 <template>
   <header class="header">
+    <input id="toggle-all"
+           class="toggle-all"
+           type="checkbox"
+           @change="handleCheckedAll" >
+    <label id="check-all"></label>
     <h1>todos</h1>
-
     <input class="new-todo"
            @keydown.enter="handleAddTodos"
            placeholder="What needs to be done?"
@@ -15,17 +19,33 @@
         props:['todos'],
         data(){
             return{
+              moreTodo:this.todos  //不能修改props的值，所以 在重新声明变量保存
             }
         },
         created(){
-            console.log(this.todos);
+            console.log(this.moreTodo);
 
         },
         methods:{
-
+          //全选
+          handleCheckedAll(e){
+              let checked = e.target.checked;
+              this.todos.forEach(item => {
+                item.completed = checked;
+              })
+          },
           //回车
-          handleAddTodos(){
-
+          handleAddTodos(e){
+            let data ={
+              id:this.moreTodo.length+1,
+              title:e.target.value.trim(),
+              completed: false
+            };
+            this.$http.post('/addTodos',{data:JSON.stringify(data)}, (res,err) => {
+              this.moreTodo = res.data.todos;
+              this.$bus.emit('addTodos', this.moreTodo); //传入
+              e.target.value = '';
+            })
           },
 
       }
@@ -33,7 +53,24 @@
 </script>
 
 <style scoped>
-
+  #check-all:before {
+    content: '❯';
+    font-weight: bolder;
+    font-size: 25px;
+    color: #368a65;
+    padding: 10px 27px 10px 27px;
+    position: absolute;
+    left: -9px;
+    top: 5px;
+  }
+  .toggle-all{
+    padding: 10px 27px 10px 27px;
+    position: absolute;
+    left: 14px;
+    top: 20px;
+    opacity: 0;
+    z-index: 10;
+  }
    h1 {
     position: absolute;
     top: -155px;

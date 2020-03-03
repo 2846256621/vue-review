@@ -2,12 +2,13 @@
   <section class="todoapp">
     <Headers :todos="todos"></Headers>
     <section class="main">
-      <label id="check-all"></label>
+
       <ul class="todo-list">
         <!--如果双击当前的edit 等于 我自己则可编辑editing  样式由edit->editing-->
         <li v-for="(item,index) in todos"
-            v-bind:class="{completed : item.completed}">
-            <!--v-bind:class="{completed : item.completed,editing:edit === item}">-->
+            v-bind:class="{completed : item.completed,editing:edit === item}">
+            <!--v-bind:class="{completed : item.completed}">-->
+
           <div class="view">
 
             <!--checkbox的v-model  true为勾选，false为 不勾选-->
@@ -21,6 +22,7 @@
           </div>
           <!-- 编辑框   因为这里可以取消编辑 不保存 所以不双向绑定数据-->
           <input class="edit" v-bind:value="item.title"
+                 type="text"
                  @keydown.enter="handleSaveEdit(item,index,$event)"
                  @blur="handleSaveEdit(item,index,$event)"
                  @keydown.esc="handleCancelEdit()"
@@ -44,6 +46,7 @@
         data() {
           return {
             todos:'',
+            edit:''
           }
         },
         created(){
@@ -61,33 +64,52 @@
           this.$bus.on('completedTodos', (item)=>{
             this.todos = item;
           });
+          //清除已完成的
+          this.$bus.on('newTodos', (item)=>{
+            this.todos = item;
+          });
+
+          this.$bus.on('addTodos', (item)=>{
+            this.todos = item;
+          });
+
         },
         methods:{
 
           //得到数据
           getTodoList() {
-            this.$http.get('/getList',{}, (res,err) => {
-                // console.log(res.data);
+            this.$http.get('/getTodoList',{}, (res,err) => {
                 this.todos = res.data.todos;
                 this.$bus.emit('getTodos', this.todos); //传入
             })
           },
 
           //双击编辑
-          handleGetEdit(id){
-
+          handleGetEdit(item){
+            this.edit = item
           },
           //删除
           handleDeleteTodos(index,e){
+             console.log(index);
+              this.todos.splice(index,1);
+
 
           },
           //保存
-          handleSaveEdit(){
+          handleSaveEdit(item,index,e){
+            let value = e.target.value.trim();
+            if(value.length){
+              item.title =value;
+              this.edit = null;
+            }
+            else{
+              this.todos.splice(index,1)
+            }
 
           },
           //退出编辑
           handleCancelEdit(){
-
+              this.edit = null
           },
 
         }
@@ -119,16 +141,7 @@
     margin-left: 20px;
   }
 
-  #check-all:before {
-    content: '❯';
-    font-weight: bolder;
-    font-size: 25px;
-    color: #368a65;
-    padding: 10px 27px 10px 27px;
-    position: absolute;
-    left: -8px;
-    top: -50px;
-  }
+
   .todo-list {
     margin: 0;
     padding: 0;
@@ -209,5 +222,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
+  .todo-list li.editing {
+    border-bottom: none;
+    padding: 0;
+  }
+  .todo-list li.editing .edit {
+    display: inline-block;
+    width: calc(90% - 43px);
+    padding: 12px 6px;
+    margin: 0 0 0 50px;
+  }
 </style>
