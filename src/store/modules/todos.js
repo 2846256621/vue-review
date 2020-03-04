@@ -16,7 +16,7 @@ const todos = {
             state.todos = payload
         },
         [ADD_TODOS](state,payload){
-            state.todos.push(payload)
+            state.todos = payload
         }
     },
     actions:{  // 通常跟api接口打交道 commit调用mutations的方法
@@ -27,7 +27,10 @@ const todos = {
                 });
         },
         addMoreTodos({commit},payload){
-            commit(ADD_TODOS,payload)
+            api.todosApi.addTodoList(payload)
+                .then(res=> {
+                    commit(ADD_TODOS,res.data.todos)
+                });
         }
     }
 };

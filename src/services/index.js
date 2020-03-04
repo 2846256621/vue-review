@@ -49,8 +49,9 @@ app.get('/completedTodos',(req,res)=>{
     msg:'成功'
   })
 });
-app.post('/addTodos',(req,res)=>{
+app.post('/addTodoList',(req,res)=>{
   todos.push(JSON.parse(req.body.data));
+  console.log(req.body);
   res.json({
     todos,
     code:200,
