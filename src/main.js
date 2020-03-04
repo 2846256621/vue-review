@@ -3,19 +3,16 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import VueBus from 'vue-bus'
-Vue.use(VueBus);
-
-import api from './api'
-Vue.prototype.$api = api;
-
 
 Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
+//引入store 并挂载到 vue上
+import store from '../src/store'
+
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 });

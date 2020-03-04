@@ -1,43 +1,40 @@
 <template>
   <section class="todoapp">
-    <Headers :todos="todos"></Headers>
+    <Headers></Headers>
     <section class="main">
 
       <ul class="todo-list">
-        <!--如果双击当前的edit 等于 我自己则可编辑editing  样式由edit->editing-->
         <li v-for="(item,index) in todos"
             v-bind:class="{completed : item.completed,editing:edit === item}">
-            <!--v-bind:class="{completed : item.completed}">-->
-
           <div class="view">
 
-            <!--checkbox的v-model  true为勾选，false为 不勾选-->
-            <input class="toggle-check" type="checkbox" v-model="item.completed">
+            <label>
+              <input class="toggle-check" type="checkbox" v-model="item.completed">
+            </label>
 
             <!--双击修改-->
             <label @dblclick="handleGetEdit(item)">{{item.title}}</label>
 
-
             <button class="destroy" @click="handleDeleteTodos(index,$event)"></button>
           </div>
           <!-- 编辑框   因为这里可以取消编辑 不保存 所以不双向绑定数据-->
-          <input class="edit" v-bind:value="item.title"
-                 type="text"
-                 @keydown.enter="handleSaveEdit(item,index,$event)"
-                 @blur="handleSaveEdit(item,index,$event)"
-                 @keydown.esc="handleCancelEdit()"
-          >
+            <input class="edit" v-bind:value="item.title"
+                   type="text"
+                   @keydown.enter="handleSaveEdit(item,index,$event)"
+                   @blur="handleSaveEdit(item,index,$event)"
+                   @keydown.esc="handleCancelEdit()"
+            >
         </li>
       </ul>
     </section>
-    <Footer :todos="todos"></Footer>
+    <Footer></Footer>
   </section>
 </template>
 
 <script>
     import Headers from './Header'
     import Footer from './Footer'
-    // import {todosApi} from '../api/todos'
+    import {mapActions, mapGetters} from "vuex";
     export default {
         name: "TodoList",
         components:{
@@ -46,28 +43,23 @@
         },
         data() {
           return {
-            todos:[],
             edit:''
           }
         },
         created(){
           this.getTodos();
-
+        },
+        computed:{
+            ...mapGetters({
+              todos: 'getStateTodos'
+            })
         },
         methods:{
 
-          //得到数据
-          getTodos(){
-              this.$api.todosApi.getTodoList()
-                  .then(res=> {
-                  // 执行某些操作
-                  //   console.log(res.data);
-                    this.todos = res.data.todos;
-                  })
-                  .catch(err=>{
-
-                  })
-          },
+          //得到初始数据
+            ...mapActions({
+               getTodos:'getInitTodos'
+            }),
 
           //双击编辑
           handleGetEdit(item){

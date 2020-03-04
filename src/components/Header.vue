@@ -14,9 +14,10 @@
 </template>
 
 <script>
+    import {mapGetters,mapActions} from "vuex";
+
     export default {
         name: "Header",
-        props:['todos'],
         data(){
             return{
 
@@ -26,14 +27,28 @@
 
 
         },
+        computed: {
+            ...mapGetters({
+                todos: 'getStateTodos'
+            })
+        },
         methods:{
+          ...mapActions([
+              'addMoreTodos'
+           ]),
           //全选
           handleCheckedAll(e){
 
           },
           //回车
           handleAddTodos(e){
-
+            let item = {
+                id:this.todos.length+1,
+                title:e.target.value.trim(),
+                completed:false
+            };
+            this.addMoreTodos(item); //调用actions 并传入参数，并提交mutation
+            e.target.value = '';
           },
 
       }
