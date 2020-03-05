@@ -15,7 +15,7 @@
             <!--双击修改-->
             <label @dblclick="handleGetEdit(item)">{{item.title}}</label>
 
-            <button class="destroy" @click="handleDeleteTodos(index,$event)"></button>
+            <button class="destroy" @click="handleDeleteTodos(item.id)"></button>
           </div>
           <!-- 编辑框   因为这里可以取消编辑 不保存 所以不双向绑定数据-->
             <input class="edit" v-bind:value="item.title"
@@ -27,7 +27,7 @@
         </li>
       </ul>
     </section>
-    <Footer></Footer>
+    <Footer v-on:changeTodos="changeAllTodos"></Footer>
   </section>
 </template>
 
@@ -41,43 +41,62 @@
           Headers,
           Footer
         },
-        data() {
-          return {
-            edit:''
-          }
-        },
         created(){
-          this.getTodos();
+            this.getInitTodos();
+            // this.todos = this.all;
+            // console.log(this.all);
         },
         computed:{
             ...mapGetters({
-              todos: 'getStateTodos'
-            })
+                todos:'getStateTodos',
+            }),
+        },
+        data() {
+          return {
+            edit:'',
+          }
         },
         methods:{
 
           //得到初始数据
-            ...mapActions({
-               getTodos:'getInitTodos'
-            }),
+            ...mapActions([
+               'getInitTodos',
+                'deleteTodos',
+                'saveEditTodos'
+            ]),
 
           //双击编辑
           handleGetEdit(item){
-
+              this.edit = item
           },
           //删除
-          handleDeleteTodos(index,e){
-
+          handleDeleteTodos(id){
+            this.deleteTodos({
+                id
+            });
           },
           //保存
           handleSaveEdit(item,index,e){
+                if(!e.target.value){
+                    this.deleteTodos({
+                        id:item.id
+                    });
+                }else{
+                    this.saveEditTodos({
+                        title:e.target.value,
+                        id:item.id
+                    });
+                    this.edit = null
+                }
 
           },
           //退出编辑
           handleCancelEdit(){
-
+            this.edit = null
           },
-
+          changeAllTodos(data){
+             this.$store.state.todos.todos = data;
+          }
         }
 
     }

@@ -1,7 +1,7 @@
 <template>
-  <footer class="footer" >
+  <footer class="footer"  >
 
-    <span class="todo-count"><strong>{{1}}</strong> item left</span>
+    <span class="todo-count"><strong>{{todos.length}}</strong> item left</span>
     <ul class="filters">
       <li>
         <a v-bind:class="{selected:all}" href="#" @click="handleAllTodos">All</a>
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+    import {mapActions, mapGetters, mapMutations} from "vuex";
+
     export default {
         name: "Footer",
         data() {
@@ -28,43 +30,62 @@
                 all: true,
                 active: false,
                 completed: false,
-
+                todos:[]
             }
         },
         computed: {
+            ...mapGetters({
+                initTodos:'getStateTodos',
+                activeTodos:'getActiveTodos',
+                completedTodos:'getCompletedTodos'
+            }),
             //展示全部清除按钮
             hasCompleted() {
-                return
-            }
-        },
-        created() {
+                return this.initTodos.some(function (item,index) {
+                    return item.completed;
+                });
+            },
 
         },
+        created() {
+            this.todos = this.initTodos
+        },
         methods: {
+            ...mapActions([
+                'clearCompleted'
+            ]),
             //全部数据
             handleAllTodos() {
                 this.active = false;
                 this.all = true;
                 this.completed = false;
 
+                this.todos = this.initTodos;
+                this.$emit('changeTodos',this.todos)
             },
             //未完成
             handleActiveTodos() {
+
                 this.all = false;
                 this.active = true;
                 this.completed = false;
 
+                this.todos = this.activeTodos;
+                this.$emit('changeTodos',this.todos)
             },
             handleCompletedTodos() {
+
                 this.active = false;
                 this.all = false;
                 this.completed = true;
 
+                this.todos = this.completedTodos;
+
+                this.$emit('changeTodos',this.todos)
             },
             //清除全部已完成的
             handleClearCompleted() {
-
-
+                this.clearCompleted();
             }
         }
     }

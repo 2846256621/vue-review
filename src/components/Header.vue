@@ -34,11 +34,14 @@
         },
         methods:{
           ...mapActions([
-              'addMoreTodos'
+              'addMoreTodos',
+              'selectAllTodos'
            ]),
           //全选
           handleCheckedAll(e){
-
+            this.selectAllTodos({
+                checked:e.target.checked
+            })
           },
           //回车
           handleAddTodos(e){
