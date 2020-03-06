@@ -18,16 +18,19 @@
             <button class="destroy" @click="handleDeleteTodos(item.id)"></button>
           </div>
           <!-- 编辑框   因为这里可以取消编辑 不保存 所以不双向绑定数据-->
-            <input class="edit" v-bind:value="item.title"
-                   type="text"
-                   @keydown.enter="handleSaveEdit(item,index,$event)"
-                   @blur="handleSaveEdit(item,index,$event)"
-                   @keydown.esc="handleCancelEdit()"
-            >
+          <input class="edit" v-bind:value="item.title"
+                 type="text"
+                 @keydown.enter="handleSaveEdit(item,index,$event)"
+                 @blur="handleSaveEdit(item,index,$event)"
+                 @keydown.esc="handleCancelEdit()"
+          >
         </li>
       </ul>
     </section>
-    <Footer v-on:changeTodos="changeAllTodos"></Footer>
+    <Footer v-on:changeTodos="changeAllTodos"
+            :todoCount="todos.length"
+            :hasCompleted="hasCompleted"
+    ></Footer>
   </section>
 </template>
 
@@ -38,45 +41,59 @@
     export default {
         name: "TodoList",
         components:{
-          Headers,
-          Footer
+            Headers,
+            Footer
         },
         created(){
             this.getInitTodos();
-            // this.todos = this.all;
-            // console.log(this.all);
+        },
+        mounted() {
+            this.todos = this.allTodos; //使用 watch去改变data，渲染视图
         },
         computed:{
             ...mapGetters({
-                todos:'getStateTodos',
+                allTodos: 'getStateTodos',
+                completedTodos: 'getCompletedTodos',
+                activeTodos: 'getActiveTodos'
             }),
+            //展示全部清除按钮
+            hasCompleted() {
+                return this.allTodos.some(function (item,index) {
+                    return item.completed;
+                });
+            },
+        },
+        watch: {
+            allTodos() {
+                this.refreshData();//去修改todos，重新渲染视图
+            }
         },
         data() {
-          return {
-            edit:'',
-          }
+            return {
+                edit:'',
+                todos: [],
+                curFilter: "ALL",
+            }
         },
         methods:{
-
-          //得到初始数据
+            //得到初始数据
             ...mapActions([
-               'getInitTodos',
+                'getInitTodos',
                 'deleteTodos',
                 'saveEditTodos'
             ]),
-
-          //双击编辑
-          handleGetEdit(item){
-              this.edit = item
-          },
-          //删除
-          handleDeleteTodos(id){
-            this.deleteTodos({
-                id
-            });
-          },
-          //保存
-          handleSaveEdit(item,index,e){
+            //双击编辑
+            handleGetEdit(item){
+                this.edit = item
+            },
+            //删除
+            handleDeleteTodos(id){
+                this.deleteTodos({
+                    id
+                });
+            },
+            //保存
+            handleSaveEdit(item,index,e){
                 if(!e.target.value){
                     this.deleteTodos({
                         id:item.id
@@ -88,15 +105,40 @@
                     });
                     this.edit = null
                 }
-
-          },
-          //退出编辑
-          handleCancelEdit(){
-            this.edit = null
-          },
-          changeAllTodos(data){
-             this.$store.state.todos.todos = data;
-          }
+            },
+            //退出编辑
+            handleCancelEdit(){
+                this.edit = null
+            },
+            //改变当前data中的 todos
+            changeAllTodos(tag){
+                switch(tag){
+                    case "ALL":
+                        this.todos = this.allTodos;
+                        break;
+                    case "ACTIVE":
+                        this.todos = this.activeTodos;
+                        break;
+                    case "COMPLETED":
+                        this.todos = this.completedTodos;
+                        break;
+                }
+                this.curFilter = tag;
+            },
+            //改变 watch中的todos，来进行视图渲染
+            refreshData() {
+                switch(this.curFilter){
+                    case "ALL":
+                        this.todos = this.allTodos;
+                        break;
+                    case "ACTIVE":
+                        this.todos = this.activeTodos;
+                        break;
+                    case "COMPLETED":
+                        this.todos = this.completedTodos;
+                        break;
+                }
+            }
         }
 
     }
